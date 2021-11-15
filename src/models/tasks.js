@@ -1,9 +1,8 @@
+// Modelo de la tabla Tasks
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const {Model} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Task extends Model {
+  class Tasks extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,14 +10,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      // defino la asociacion de las tablas a nivel de proyecto
+      Tasks.belongsTo(models.Users, { // Una tarea tiene solo un usuario
+        foreignKey: 'userId',
+      })
     }
   };
-  Task.init({
+  Tasks.init({
+    userId:DataTypes.INTEGER,
     title: DataTypes.STRING,
     description: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'Task'
+    modelName: 'Tasks',
   });
-  return Task;
+  return Tasks;
 };
