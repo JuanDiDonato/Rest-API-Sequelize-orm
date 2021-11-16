@@ -1,6 +1,7 @@
 // Modelo de la tabla Users
 'use strict';
 const {Model} = require('sequelize');
+const {EncryptPassword} = require('../helpers/bcrypt')
 module.exports = (sequelize, DataTypes) => {
   class Users extends Model {
     /**
@@ -25,5 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Users',
   });
+
+  Users.beforeCreate(EncryptPassword);
+  Users.beforeUpdate(EncryptPassword);
   return Users;
 };

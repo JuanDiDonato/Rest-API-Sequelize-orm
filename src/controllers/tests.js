@@ -1,42 +1,45 @@
-const Modelos = require('../models')
+const {Tasks} = require('../models')
+const {getTasks,getTask,newTask, updateTask, deleteTask} = require('../services/tasks')
 testsControllers = {}
 
-testsControllers.get = async (req,res) => {
-    console.log(Modelos.Tasks);
-    const notas = await Modelos.Tasks.findAll()
-    res.status(200).send(notas)
+// Obtener notas
+testsControllers.get = (req,res,next) => {
+    const userId = req.user.id
+    getTasks(userId).then(tasks => res.status(200).send(tasks)).catch(next)
 }
 
-testsControllers.getId = async (req,res) => {
+// Obtener una nota por id
+testsControllers.getId =  (req,res,next) => {
     const {id} = req.params
-    const nota = await Modelos.Tasks.findOne({where : {id:id}})
-    res.status(200).send(nota)
+    const userId = req.user.id
+    getTask(id, userId).then(task => res.status(200).send(task)).catch(next)
 }
 
-testsControllers.post = async (req,res) => {
+// Crear una nota
+testsControllers.post = (req,res, next) => {
     const {title, description} = req.body
-    const newTask = {title, description}
-    const created = await Modelos.Tasks.create(newTask)
-    if(created) return res.status(201).send()
-    else res.status(400).send({error : true})
+    const userId = req.user.id
+    newTask({title, description, userId}).then(task => res.status(201).send(task)).catch(next)
 }
 
-testsControllers.put = async (req,res) => {
+// Editar una nota
+testsControllers.put = (req,res) => {
     const {id} = req.params
-    const task = await Modelos.Tasks.findOne({ where: {id}})
-    if(!task) res.status(404).send({error:true, msj:"La nota no existe."})
-    else{
-        const {title, description} = req.body
-        await Modelos.Tasks.update({title, description}, {where: {id}})
-        res.status(200).send({msj:"Done"})
-    }
-    
+    const userId = req.user.id
+    getTask(id, userId).then(task => {
+        if(!task) res.status(404).send({error:true, msj:"La nota no existe."})
+        else{
+            const {title, description} = req.body
+            updateTask({title, description},id, userId).then(task => res.status(200).send()).catch(next)
+        }
+    })
 }
 
-testsControllers.borrar = async (req,res) => {
+// Borrar una nota
+testsControllers.borrar = (req,res) => {
     const {id} = req.params
-    await Modelos.Tasks.destroy({where: {id}})
-    res.status(204).send()
+    const userId = req.user.id
+    deleteTask(id, userId).then(task => res.status(204).send())
 }
 
 module.exports=testsControllers
